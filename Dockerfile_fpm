@@ -1,0 +1,23 @@
+FROM php:7.2-fpm
+
+# Get user id and group id from arguments.
+ARG UID
+ARG GID
+
+# Add user.
+RUN sed -i -e"s/^user\s=\swww-data/user = serveruser/" /usr/local/etc/php-fpm.d/www.conf && \
+  sed -i -e"s/^group\s=\swww-data/group = serveruser/" /usr/local/etc/php-fpm.d/www.conf && \
+  sed -i -e"s/^;php_admin_value\[memory_limit\]\s=\s32M/php_admin_value[memory_limit] = 256M/" /usr/local/etc/php-fpm.d/www.conf && \
+  groupadd -r serveruser -g $GID && useradd -ms /bin/bash serveruser -u $UID -g $GID
+
+# MySQL.
+RUN docker-php-ext-install pdo_mysql
+
+WORKDIR /home/serveruser
+
+# Copy sites.
+RUN mkdir /home/serveruser/vhosts
+ADD data/www/ /home/serveruser/vhosts/
+RUN chown -R serveruser:serveruser /home/serveruser/vhosts
+
+CMD ["php-fpm"]

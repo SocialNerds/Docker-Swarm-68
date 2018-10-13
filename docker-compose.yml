@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  server:
+    image: localhost:5000/dockernerds_server
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - apache-logs:/var/log/apache2
+    depends_on:
+      - fpm
+    networks:
+      dockernerds_net:
+        aliases:
+          - server
+          - dockernerds.local
+  fpm:
+    image: localhost:5000/dockernerds_fpm
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_HOST: ${MYSQL_HOST}
+    networks:
+      dockernerds_net:
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8080:80
+    environment:
+      PMA_HOST: ${MYSQL_HOST}
+      PHP_UPLOAD_MAX_FILESIZE: 67108864
+    networks:
+      dockernerds_net:
+networks:
+  dockernerds_net:
+volumes:
+  db-data:
+  db-logs:
+  apache-logs:

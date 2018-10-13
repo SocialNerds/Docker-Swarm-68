@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  registry:
+    image: registry
+    container_name: dockernerds_registry
+    ports:
+      - 5000:5000
+    volumes:
+      - ./data:/var/lib/registry:delegated
+    networks:
+      registry_net:
+networks:
+  registry_net:
+    driver: bridge
+    ipam:
+      driver: default
